@@ -1,0 +1,757 @@
+22. matrix chain Multiplication
+#include <stdio.h>
+#include <limits.h>
+int matrixChainOrder(int p[], int n) {
+ int m[n][n],i,j,k,l; 
+ for (i = 1; i < n; i++)
+ m[i][i] = 0;
+ for (l = 2; l < n; l++) {
+ for (i = 1; i < n - l + 1; i++) {
+ j = i + l - 1;
+ m[i][j] = INT_MAX;
+ for (k = i; k < j; k++) {
+ int q = m[i][k] + m[k + 1][j] + p[i - 1] * p[k] * p[j];
+ if (q < m[i][j])
+ m[i][j] = q;
+ }
+ }
+ }
+ return m[1][n - 1]; 
+}
+int main() {
+ int n,i;
+ printf("Enter the number of matrices: ");
+ scanf("%d", &n);
+ int p[n + 1];
+ printf("Enter the dimensions: ");
+ for (i = 0; i <= n; i++) {
+ scanf("%d", &p[i]);
+ }
+ int minCost = matrixChainOrder(p, n + 1);
+ printf("Minimum number of multiplications is: %d\n", minCost);
+ return 0;
+}
+
+23.String Editing Algorithm
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+int min(int x, int y, int z) {
+ return x < y ? (x < z ? x : z) : (y < z ? y : z);
+}
+int editDistance(char *str1, char *str2, int m, int n) {
+ int dp[m + 1][n + 1],i,j;
+ for (i = 0; i <= m; i++) {
+ for (j = 0; j <= n; j++) {
+ if (i == 0) {
+ dp[i][j] = j; // Insert all j characters of str2
+ }
+ else if (j == 0) {
+ dp[i][j] = i; // Remove all i characters of str1
+ }
+ else if (str1[i - 1] == str2[j - 1]) {
+ dp[i][j] = dp[i - 1][j - 1];
+ }
+ else {
+ dp[i][j] = 1 + min(dp[i][j - 1], // Insert
+ dp[i - 1][j], // Remove
+ dp[i - 1][j - 1] // Replace
+ ); }} }
+ return dp[m][n];
+}
+int main() {
+ char str1[100], str2[100];
+ printf("Enter the first string: ");
+ scanf("%s", str1);
+ printf("Enter the second string: ");
+ scanf("%s", str2);
+ int m = strlen(str1);
+ int n = strlen(str2);
+ int result = editDistance(str1, str2, m, n);
+ printf("The edit distance between the two strings is: %d\n", result);
+ return 0;
+}
+
+24. longest common subseqent(lcs)
+#include <stdio.h>
+#include <string.h>
+int lcs(char *X, char *Y, int m, int n) {
+ int L[m + 1][n + 1];
+ int i, j;
+ for (i = 0; i <= m; i++) {
+ for (j = 0; j <= n; j++) {
+ if (i == 0 || j == 0) {
+ L[i][j] = 0;
+ } else if (X[i - 1] == Y[j - 1]) {
+ L[i][j] = L[i - 1][j - 1] + 1;
+ } else {
+ L[i][j] = (L[i - 1][j] > L[i][j - 1]) ? L[i - 1][j] : L[i][j - 1];
+ }
+ }
+ }
+ return L[m][n];
+}
+void printLCS(char *X, char *Y, int m, int n) {
+ int L[m + 1][n + 1];
+ int i, j;
+ for (i = 0; i <= m; i++) {
+ for (j = 0; j <= n; j++) {
+ if (i == 0 || j == 0) {
+ L[i][j] = 0;
+ } else if (X[i - 1] == Y[j - 1]) {
+ L[i][j] = L[i - 1][j - 1] + 1;
+ } else {
+ L[i][j] = (L[i - 1][j] > L[i][j - 1]) ? L[i - 1][j] : L[i][j - 1];
+ }
+ }
+ }
+ int index = L[m][n];
+ char lcs[index + 1];
+ lcs[index] = '\0'; // Set the terminating character
+ i = m;
+ j = n;
+ while (i > 0 && j > 0) {
+ if (X[i - 1] == Y[j - 1]) {
+ lcs[index - 1] = X[i - 1];
+ i--;
+ j--;
+ index--;
+ } else if (L[i - 1][j] > L[i][j - 1]) {
+ i--;
+ } else {
+ j--;
+ } }
+ printf("Longest Common Subsequence: %s\n", lcs);
+}
+int main() {
+ char X[100], Y[100];
+ printf("Enter the first string: ");
+ scanf("%s", X);
+ printf("Enter the second string: ");
+ scanf("%s", Y);
+ int m = strlen(X);
+ int n = strlen(Y);
+ int length = lcs(X, Y, m, n);
+ printf("Length of the Longest Common Subsequence: %d\n", length);
+ printLCS(X, Y, m, n);
+ return 0;
+}
+
+25.0/1 knapsack(dynamic approach)
+#include <stdio.h>
+int max(int a, int b) {
+ return (a > b) ? a : b;
+}
+int knapsack(int W, int wt[], int val[], int n) {
+ int dp[n + 1][W + 1] ,i,w;
+ for (i = 0; i <= n; i++) {
+ for (w = 0; w <= W; w++) {
+ if (i == 0 || w == 0) {
+ dp[i][w] = 0; // Base case: no items or zero capacity
+ } else if (wt[i - 1] <= w) {
+ dp[i][w] = max(val[i - 1] + dp[i - 1][w - wt[i - 1]], dp[i - 1][w]);
+ } else {
+ dp[i][w] = dp[i - 1][w]; // Exclude the item } }
+ }
+ return dp[n][W];
+}
+int main() {
+ int n, W,i;
+ printf("Enter the number of items: ");
+ scanf("%d", &n);
+ int val[n], wt[n];
+ printf("Enter the values of the items: ");
+ for (i = 0; i < n; i++) {
+ scanf("%d", &val[i]);
+ }
+ printf("Enter the weights of the items: ");
+ for (i = 0; i < n; i++) {
+ scanf("%d", &wt[i]);
+ }
+ printf("Enter the capacity of the knapsack: ");
+ scanf("%d", &W);
+ int maxValue = knapsack(W, wt, val, n);
+ printf("The maximum value that can be carried in the knapsack is: %d\n", 
+maxValue);
+ return 0;
+}
+
+26.floyd warshall alogrithm.
+#include <stdio.h>
+#include <limits.h>
+#define V 4
+void printSolution(int dist[][V]) {
+ printf("The following matrix shows the shortest distances between every pair 
+of vertices:\n");
+ int i,j;
+for (i = 0; i < V; i++) {
+ for (j = 0; j < V; j++) {
+ if (dist[i][j] == INT_MAX)
+ printf("%7s", "INF");
+ else
+ printf("%7d", dist[i][j]);
+ }
+ printf("\n");
+ }
+}
+void floydWarshall(int graph[][V]) {
+ int dist[V][V]; // dist[i][j] will hold the shortest distance from i to j
+ int i,j,k;
+for (i = 0; i < V; i++)
+ for (j = 0; j < V; j++)
+ dist[i][j] = graph[i][j];
+ for (k = 0; k < V; k++) {
+ for (i = 0; i < V; i++) {
+ for (j = 0; j < V; j++) {
+ if (dist[i][k] != INT_MAX && dist[k][j] != INT_MAX && dist[i][k] 
++ dist[k][j] < dist[i][j])
+ dist[i][j] = dist[i][k] + dist[k][j]; } } }
+ printSolution(dist);
+}
+int main() {
+ int graph[V][V] = { {0, 3, INT_MAX, 7},
+ {INT_MAX, 0, 1, INT_MAX},
+ {INT_MAX, INT_MAX, 0, 2},
+ {INT_MAX, INT_MAX, INT_MAX, 0} };
+ floydWarshall(graph);
+ return 0;
+}
+
+27. Travelling Salesman Problem:
+#include <stdio.h>
+#include <limits.h>
+#define MAX_CITIES 25
+#define INF INT_MAX
+int matrix[MAX_CITIES][MAX_CITIES], visited_cities[MAX_CITIES], limit, 
+cost = 0;
+int tsp(int c)
+{
+ int count, nearest_city = -1;
+ int minimum = INF;
+ for (count = 0; count < limit; count++){
+ if ((matrix[c][count] != 0) && (visited_cities[count] == 0)){
+ if (matrix[c][count] < minimum) {
+ minimum = matrix[c][count];
+ nearest_city = count;} } }
+ if (nearest_city != -1) {
+ cost += matrix[c][nearest_city];
+ }
+ return nearest_city;
+}
+void minimum_cost(int city){
+ int nearest_city;
+ visited_cities[city] = 1;
+ printf("%d ", city + 1);
+ nearest_city = tsp(city);
+ if (nearest_city == -1) {
+ nearest_city = 0;
+ printf("%d ", nearest_city + 1);
+ cost += matrix[city][nearest_city];
+ return;
+ }
+ minimum_cost(nearest_city);
+}
+int main() {
+ int i, j;
+ printf("Enter Total Number of Cities (up to %d):", MAX_CITIES);
+ scanf("%d", &limit);
+ if (limit > MAX_CITIES) {
+ printf("Limit exceeds maximum number of cities (%d).\n", 
+MAX_CITIES);
+ return 1;
+ }
+ printf("\nEnter Cost Matrix (%d x %d):\n", limit, limit);
+ for (i = 0; i < limit; i++) {
+ printf("Enter %d elements for Row %d:\n", limit, i + 1);
+ for (j = 0; j < limit; j++)
+ {
+ scanf("%d", &matrix[i][j]);
+ if (matrix[i][j] < 0) {
+ printf("Cost cannot be negative.\n");
+ return 1; } }
+ visited_cities[i] = 0;
+ }
+ printf("\nEntered Cost Matrix:\n");
+ for (i = 0; i < limit; i++) {
+ for (j = 0; j < limit; j++) {
+ printf("%d ", matrix[i][j]);
+ }
+ printf("\n"); }
+ printf("\nPath:\t");
+ minimum_cost(0); // Start from the first city
+ printf("\n\nMinimum Cost: \t%d\n", cost);
+ return 0;
+}
+
+28. Memorization:
+#include <stdio.h>
+#define MAX 1000
+int memo[MAX];
+void initializeMemo() {
+ int i;
+for (i = 0; i < MAX; i++) {
+ memo[i] = -1; // -1 indicates that the value is not computed yet
+ }
+}
+int fibonacci(int n) {
+ if (n == 0) return 0;
+ if (n == 1) return 1;
+ if (memo[n] != -1) {
+ return memo[n];
+ }
+ memo[n] = fibonacci(n - 1) + fibonacci(n - 2);
+ return memo[n];
+}
+int main() {
+ int n;
+ printf("Enter the position of Fibonacci number to compute: ");
+ scanf("%d", &n);
+ if (n < 0 || n >= MAX) {
+ printf("Position must be between 0 and %d.\n", MAX - 1);
+ return 1;
+ }
+ initializeMemo();
+ printf("Fibonacci number at position %d is %d\n", n, fibonacci(n));
+ return 0;
+}
+
+29. subset_sum problem
+#include <stdio.h>
+#include <stdbool.h>
+#define MAX 100
+void printSubset(int subset[], int subsetSize) {
+ printf("{ ");
+ int i;
+for (i = 0; i < subsetSize; i++) {
+ printf("%d ", subset[i]); }
+ printf("}\n"); }
+bool subsetSum(int arr[], int n, int targetSum, int subset[], int subsetSize) {
+ if (targetSum == 0) {
+ printSubset(subset, subsetSize);
+ return true;
+ } if (n == 0 || targetSum < 0) {
+ return false; }
+ if (subsetSum(arr, n - 1, targetSum, subset, subsetSize)) {
+ return true; }
+ subset[subsetSize] = arr[n - 1];
+ if (subsetSum(arr, n - 1, targetSum - arr[n - 1], subset, subsetSize + 1)) {
+ return true; }
+ return false;
+}
+int main() {
+ int n,i, targetSum;
+ int arr[MAX], subset[MAX];
+ printf("Enter the number of elements: ");
+ scanf("%d", &n);
+ printf("Enter the elements:\n");
+ for (i = 0; i < n; i++) {
+ scanf("%d", &arr[i]); }
+ printf("Enter the target sum: ");
+ scanf("%d", &targetSum);
+ for (i = 0; i < MAX; i++) {
+ subset[i] = 0; }
+ if (!subsetSum(arr, n, targetSum, subset, 0)) {
+ printf("No subset with the given sum exists.\n"); }
+ return 0;
+}
+
+30. 0/1 knapsack using backtracking
+#include <stdio.h>
+#define MAX_ITEMS 100
+void knapsack(int weights[], int values[], int n, int capacity, int currentIndex, int 
+currentWeight, int currentValue, int *maxValue) {
+ if (currentWeight > capacity) {
+ return;
+ }
+ if (currentValue > *maxValue) {
+ *maxValue = currentValue;
+ }
+ int i;
+ for (i = currentIndex; i < n; i++) {
+ knapsack(weights, values, n, capacity, i + 1, currentWeight + weights[i], 
+currentValue + values[i], maxValue);
+ }
+}
+int main() {
+ int n, capacity,i;
+ int weights[MAX_ITEMS], values[MAX_ITEMS];
+ printf("Enter the number of items: ");
+ scanf("%d", &n);
+ printf("Enter the weights of the items:\n");
+ for (i = 0; i < n; i++) {
+ scanf("%d", &weights[i]);
+ }
+ printf("Enter the values of the items:\n");
+ for (i = 0; i < n; i++) {
+ scanf("%d", &values[i]);
+ }
+ printf("Enter the capacity of the knapsack: ");
+ scanf("%d", &capacity);
+ int maxValue = 0;
+ knapsack(weights, values, n, capacity, 0, 0, 0, &maxValue);
+ printf("The maximum value that can be obtained is: %d\n", maxValue);
+ return 0;
+}
+
+31. n-queen problem
+#include <stdio.h>
+#include <stdbool.h>
+#define MAX_N 15 // Define the maximum size of the board
+void printSolution(int board[MAX_N][MAX_N], int N) {
+ int i,j;
+printf("Solution:\n");
+ for (i = 0; i < N; i++) {
+ for (j = 0; j < N; j++) {
+ if (board[i][j] == 1) {
+ printf(" Q ");
+ } else {
+ printf(" . ");
+ }
+ }
+ printf("\n");
+ }
+ printf("\n");
+}
+bool isSafe(int board[MAX_N][MAX_N], int row, int col, int N) {
+ // Check this row on the left side
+ int i,j;
+ for (i = 0; i < col; i++) {
+ if (board[row][i] == 1) {
+ return false;
+ }
+ }
+ for (i = row, j = col; i >= 0 && j >= 0; i--, j--) {
+ if (board[i][j] == 1) {
+ return false;
+ }
+ } for (i = row, j = col; j >= 0 && i < N; i++, j--) {
+ if (board[i][j] == 1) {
+ return false;
+ }
+ }
+ return true;
+}
+bool solveNQueens(int board[MAX_N][MAX_N], int col, int N) {
+ if (col >= N) {
+ return true;
+ }
+ int i;
+ for (i = 0; i < N; i++) {
+ if (isSafe(board, i, col, N)) {
+ board[i][col] = 1;
+ if (solveNQueens(board, col + 1, N)) {
+ return true;
+ }
+ board[i][col] = 0;
+ }
+ }
+ return false;
+}
+int main() {
+ int N;
+ int board[MAX_N][MAX_N] = {0}; // Initialize the board with 0s
+ printf("Enter the number of queens (N): ");
+ scanf("%d", &N);
+ if (N > MAX_N) {
+ printf("The maximum number of queens allowed is %d.\n", MAX_N);
+ return 1;
+ }
+ if (solveNQueens(board, 0, N)) {
+ printSolution(board, N);
+ } else {
+ printf("No solution exists for N = %d.\n", N);
+ return 0;
+}
+}
+
+32.euclid's algorithm
+#include <stdio.h>
+int gcd(int a, int b) {
+ while (b != 0) {
+ int temp = b;
+ b = a % b;
+ a = temp;
+ }
+ return a;
+}
+void solveModularLinearEquation(int a, int b, int m) {
+ int d = gcd(a, m);
+ if (b % d != 0) {
+ printf("No solution exists\n");
+ return;
+ }
+ int a_prime = a / d;
+ int b_prime = b / d;
+ int m_prime = m / d;
+ int x = 0;
+ int found = 0;
+ int i;
+ for (i= 0; i < m_prime; i++) {
+ if ((a_prime * i) % m_prime == 1) {
+ x = i;
+ found = 1;
+ break; }
+ }
+ if (!found) {
+ printf("No multiplicative inverse exists\n");
+ return;
+ }
+ int x0 = (x * b_prime) % m_prime;
+ if (x0 < 0) {
+ x0 += m_prime;
+ }
+ printf("A solution is x = %d\n", x0);
+ printf("General solution: x = %d + k * %d\n", x0, m_prime); }
+int main() {
+ int a, b, m;
+ printf("Enter coefficients a, b, and modulus m:\n");
+ scanf("%d %d %d", &a, &b, &m);
+ solveModularLinearEquation(a, b, m);
+ return 0; 
+}
+
+33.Extended Euclid's Algorithm
+#include <stdio.h>
+int extendedGCD(int a, int b, int *x, int *y) {
+ if (b == 0) {
+ *x = 1;
+ *y = 0;
+ return a;
+ }
+ int x1, y1;
+ int gcd = extendedGCD(b, a % b, &x1, &y1);
+ *x = y1;
+ *y = x1 - (a / b) * y1;
+ return gcd;
+}
+void solveModularLinearEquation(int a, int b, int m) {
+ int x, y;
+ int d = extendedGCD(a, m, &x, &y);
+ printf("Extended Euclidean Algorithm steps:\n");
+ printf("GCD(%d, %d) = %d\n", a, m, d);
+ printf("Coefficients: x = %d, y = %d\n", x, y);
+ if (b % d != 0) {
+ printf("No solution exists\n");
+ return;
+ }
+ int x0 = x * (b / d);
+ int m0 = m / d;
+ x0 = ((x0 % m0) + m0) % m0;
+ printf("A particular solution is x = %d\n", x0);
+ printf("General solution: x = %d + k * %d\n", x0, m0);
+}
+int main() {
+ int a, b, m;
+ printf("Enter coefficients a, b, and modulus m:\n");
+ scanf("%d %d %d", &a, &b, &m);
+ solveModularLinearEquation(a, b, m);
+ return 0;
+}
+
+33. miller_rabin primality test
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+unsigned long long modExp(unsigned long long base, unsigned long long exp, 
+unsigned long long mod) {
+ unsigned long long result = 1;
+ base = base % mod;
+ while (exp > 0) {
+ if (exp % 2 == 1) {
+ result = (result * base) % mod;
+ }
+ exp = exp >> 1;
+ base = (base * base) % mod;
+ }
+ return result;
+}
+int millerRabin(unsigned long long n, int k) {
+ if (n <= 1) return 0; // 0 and 1 are not prime
+ if (n <= 3) return 1; // 2 and 3 are prime
+ unsigned long long d = n - 1;
+ unsigned long long r = 0;
+ while (d % 2 == 0) {
+ d /= 2;
+ r++;
+ }
+int i;
+ for ( i = 0; i < k; i++) {
+ unsigned long long a = 2 + rand() % (n - 4);
+ unsigned long long x = modExp(a, d, n);
+ if (x == 1 || x == n - 1) continue;
+ int continueOuterLoop = 0;
+ unsigned long long j;
+for ( j = 0; j < r - 1; j++) {
+ x = modExp(x, 2, n);
+ if (x == n - 1) {
+ continueOuterLoop = 1;
+ break;
+ }
+ }
+ if (continueOuterLoop) continue;
+ return 0; // Composite
+ }
+ return 1; // Probably prime
+}
+int main() {
+ unsigned long long n;
+ int k;
+ srand(time(NULL));
+ printf("Enter the number to test for primality: ");
+ scanf("%llu", &n);
+ printf("Enter the number of iterations: ");
+ scanf("%d", &k);
+ if (millerRabin(n, k)) {
+ printf("%llu is probably prime.\n", n);
+ } else {
+ printf("%llu is composite.\n", n);
+ }
+ return 0;
+}
+
+34. chinese remainder theorem(crt)
+#include <stdio.h>
+int gcd(int a, int b) {
+ if (b == 0)
+ return a;
+ return gcd(b, a % b);
+}
+int modInverse(int a, int m) {
+ int m0 = m, t, q;
+ int x0 = 0, x1 = 1;
+ if (m == 1)
+ return 0;
+ while (a > 1) {
+ q = a / m;
+ t = m;
+ m = a % m;
+ a = t;
+ t = x0;
+ x0 = x1 - q * x0;
+ x1 = t;
+ }
+ if (x1 < 0)
+ x1 += m0;
+ return x1;
+}
+int findMinX(int num[], int rem[], int k) {
+ int prod = 1;
+ int result = 0;
+ int i;
+for (i = 0; i < k; i++)
+ prod *= num[i];
+ for (i = 0; i < k; i++) {
+ int pp = prod / num[i];
+ result += rem[i] * modInverse(pp, num[i]) * pp;
+ }
+ return result % prod;
+}
+int main() {
+ int num[10], rem[10],i, k;
+ printf("Enter the number of equations: ");
+ scanf("%d", &k);
+ printf("Enter the values for num[] (moduli) and rem[] (remainders):\n");
+ for (i = 0; i < k; i++) {
+ printf("Equation %d:\n", i + 1);
+ printf("Modulus (n_%d): ", i + 1);
+ scanf("%d", &num[i]);
+ printf("Remainder (a_%d): ", i + 1);
+ scanf("%d", &rem[i]);
+ }
+ int x = findMinX(num, rem, k);
+ printf("The minimum x that satisfies the given system of congruences is: 
+%d\n", x);
+ return 0;
+}
+
+35. vertex_cover problem
+#include <stdio.h>
+#include <stdbool.h>
+#define MAX_VERTICES 100
+void vertexCover(int graph[MAX_VERTICES][MAX_VERTICES], int V) {
+ bool visited[MAX_VERTICES] = {false}; // Array to mark visited vertices
+ int i,u,v;
+for (u = 0; u < V; u++) {
+ if (!visited[u]) {
+ for (v = 0; v < V; v++) {
+ if (graph[u][v] && !visited[v]) {
+ visited[u] = true;
+ visited[v] = true;
+ break; // Move to the next vertex u
+ }
+ }
+ }
+ }
+ printf("The Vertex Cover is: ");
+ for (i = 0; i < V; i++) {
+ if (visited[i]) {
+ printf("%d ", i);
+ }
+ }
+ printf("\n");
+}
+int main() {
+ int V,i,j; // Number of vertices
+ printf("Enter the number of vertices: ");
+ scanf("%d", &V);
+ int graph[MAX_VERTICES][MAX_VERTICES];
+ printf("Enter the adjacency matrix:\n");
+ for (i = 0; i < V; i++) {
+ for (j = 0; j < V; j++) {
+ scanf("%d", &graph[i][j]);
+ }
+ }
+ vertexCover(graph, V);
+ return 0;
+}
+
+36.subset_sum problem(using approximation
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#define MAX_ELEMENTS 30
+int closestSubsetSum(int arr[], int n, int target) {
+ int total = 1 << n; // Total number of subsets
+ int closest = 0; // Closest sum to the target
+ int i,j;
+for (i = 0; i < total; i++) {
+ int sum = 0;
+ for (j = 0; j < n; j++) {
+ if (i & (1 << j)) {
+ sum += arr[j];
+ }
+ }
+ if (abs(target - sum) < abs(target - closest)) {
+ closest = sum;
+ }
+ }
+ return closest;
+}
+int main() {
+ int n, target,i;
+ printf("Enter the number of elements: ");
+ scanf("%d", &n);
+ if (n > MAX_ELEMENTS) {
+ printf("The number of elements cannot exceed %d.\n", 
+MAX_ELEMENTS);
+ return 1;
+ }
+ int arr[MAX_ELEMENTS];
+ printf("Enter the elements:\n");
+ for (i = 0; i < n; i++) {
+ scanf("%d", &arr[i]);
+ }
+ printf("Enter the target sum: ");
+ scanf("%d", &target);
+ int closest = closestSubsetSum(arr, n, target);
+ printf("The closest subset sum to the target is: %d\n", closest);
+ return 0;
+}
+
+
+
+
+
+
+
+
